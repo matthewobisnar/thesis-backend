@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Oct 20, 2021 at 04:35 PM
+-- Generation Time: Oct 20, 2021 at 10:12 PM
 -- Server version: 8.0.26-0ubuntu0.20.04.3
 -- PHP Version: 7.4.3
 
@@ -50,7 +50,7 @@ INSERT INTO `customer` (`customer_id`, `customer_first_name`, `customer_last_nam
 (8, 'John2', 'depp2', '091234567891', 'john@email.com', 'sample text', 2, '2021-10-16 09:37:48', '2021-10-19 08:16:26'),
 (15, 'marki', 'king', '09123456789', 'mark@email.com', 'sample text', 2, '2021-10-16 09:37:14', '2021-10-19 11:53:40'),
 (16, 'John', 'depp', '091234567891', 'john@email.com', 'sample text', 2, '2021-10-16 09:37:48', '2021-10-20 07:54:03'),
-(19, 'John2', 'depp2', '091234567891', 'john@email.com', 'sample text', 1, '2021-10-16 09:37:48', '2021-10-20 02:42:01');
+(19, 'John2', 'depp2', '091234567891', 'john@email.com', 'sample text', 2, '2021-10-16 09:37:48', '2021-10-20 13:51:54');
 
 -- --------------------------------------------------------
 
@@ -75,11 +75,9 @@ CREATE TABLE `employee` (
 --
 
 INSERT INTO `employee` (`emp_id`, `emp_first_name`, `emp_last_name`, `emp_mobile_number`, `emp_email`, `emp_status`, `emp_created_at`, `emp_updated_at`, `emp_last_joined`) VALUES
-(2, 'john', 'depp', '09987654321', 'john@email.com', 1, '2021-10-17 07:34:20', NULL, NULL),
-(3, 'mark', 'king', '09123458765', 'mark@email.com', 0, '2021-10-17 07:34:20', NULL, NULL),
-(4, 'john', 'wick', '09987123458', 'jwick@email.com', 1, '2021-10-17 07:34:20', NULL, NULL),
-(12, 'eewr', 'mathh', '09067722502', 'matthew@gmail.com', 0, '2021-10-19 11:48:41', NULL, NULL),
-(13, 'matthr', 'sdfsdf', '1654654654', 'weqwe@gmail.com', 0, '2021-10-20 07:55:00', NULL, NULL);
+(14, 'matthew ', 'bisnar', '9452567866', 'matthew@gmail.com', 1, '2021-10-20 10:26:25', '2021-10-20 14:06:09', NULL),
+(15, 'louki', 'compton', '9959522576', 'louki@email.com', 1, '2021-10-20 11:08:39', '2021-10-20 11:11:17', NULL),
+(16, 'mike ', 'tasse', '9067722502', 'mike@gmail.com', 0, '2021-10-20 14:01:28', '2021-10-20 14:11:24', NULL);
 
 -- --------------------------------------------------------
 
@@ -99,7 +97,8 @@ CREATE TABLE `message` (
 --
 
 INSERT INTO `message` (`message_id`, `message_content`, `message_is_sent`, `message_created_at`) VALUES
-(1, 'Hello World', 0, '2021-10-17 02:50:37');
+(1, 'Hello World', 0, '2021-10-17 02:50:37'),
+(2, 'Hello There.', 0, '2021-10-20 12:48:25');
 
 -- --------------------------------------------------------
 
@@ -123,8 +122,8 @@ CREATE TABLE `opt_in` (
 --
 
 INSERT INTO `opt_in` (`opt_in_id`, `opt_in_mobile_number`, `opt_in_token`, `opt_in_status`, `opt_in_is_sent`, `opt_in_created_at`, `opt_in_updated_at`, `opt_out_at`) VALUES
-(1, '9959522576', '123', 0, 0, '2021-10-16 05:14:28', '2021-10-16 11:20:41', '2021-10-16 11:20:41'),
-(2, '9959522576', '123', 0, 0, '2021-10-16 06:56:08', NULL, NULL);
+(4, '9452567866', 'hXSPzkNZ3PGrl1CPyLDsb4rKMche8yR0Tdq_bL6Yujs', 0, 0, '2021-10-20 11:00:58', NULL, NULL),
+(5, '9959522576', 'VNxMX22H2GwwQ9LYbUoBp69KGMSS_tC4HQZJx8Dn1zA', 0, 0, '2021-10-20 11:11:17', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -145,20 +144,6 @@ CREATE TABLE `products` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `sent_junction`
---
-
-CREATE TABLE `sent_junction` (
-  `sent_junction_id` int NOT NULL,
-  `sent_junction_message_id` int NOT NULL,
-  `sent_junction_emp_id` int NOT NULL,
-  `sent_junction_created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `sent_junction_updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf16;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `sent_message`
 --
 
@@ -168,6 +153,14 @@ CREATE TABLE `sent_message` (
   `sent_message_mobile` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
   `sent_created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8_unicode_ci;
+
+--
+-- Dumping data for table `sent_message`
+--
+
+INSERT INTO `sent_message` (`sent_message_id`, `sent_message_message`, `sent_message_mobile`, `sent_created_at`) VALUES
+(17, '2', '9452567866', '2021-10-20 12:48:25'),
+(18, '2', '9959522576', '2021-10-20 12:48:26');
 
 -- --------------------------------------------------------
 
@@ -201,6 +194,13 @@ CREATE TABLE `todo` (
   `todo_created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `todo_updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8_unicode_ci;
+
+--
+-- Dumping data for table `todo`
+--
+
+INSERT INTO `todo` (`todo_id`, `todo_title`, `todo_description`, `todo_status`, `todo_deadline`, `todo_created_at`, `todo_updated_at`) VALUES
+(39, 'dfsdf', 'sfsdf', 0, '2021-10-06 16:00:00', '2021-10-20 10:46:14', NULL);
 
 -- --------------------------------------------------------
 
@@ -281,12 +281,6 @@ ALTER TABLE `products`
   ADD PRIMARY KEY (`product_id`);
 
 --
--- Indexes for table `sent_junction`
---
-ALTER TABLE `sent_junction`
-  ADD PRIMARY KEY (`sent_junction_id`);
-
---
 -- Indexes for table `sent_message`
 --
 ALTER TABLE `sent_message`
@@ -330,19 +324,19 @@ ALTER TABLE `customer`
 -- AUTO_INCREMENT for table `employee`
 --
 ALTER TABLE `employee`
-  MODIFY `emp_id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `emp_id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `message`
 --
 ALTER TABLE `message`
-  MODIFY `message_id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `message_id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `opt_in`
 --
 ALTER TABLE `opt_in`
-  MODIFY `opt_in_id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `opt_in_id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `products`
@@ -351,16 +345,10 @@ ALTER TABLE `products`
   MODIFY `product_id` int UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `sent_junction`
---
-ALTER TABLE `sent_junction`
-  MODIFY `sent_junction_id` int NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT for table `sent_message`
 --
 ALTER TABLE `sent_message`
-  MODIFY `sent_message_id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `sent_message_id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT for table `services`
@@ -372,7 +360,7 @@ ALTER TABLE `services`
 -- AUTO_INCREMENT for table `todo`
 --
 ALTER TABLE `todo`
-  MODIFY `todo_id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
+  MODIFY `todo_id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
 
 --
 -- AUTO_INCREMENT for table `token`

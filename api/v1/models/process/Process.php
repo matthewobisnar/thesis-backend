@@ -117,13 +117,13 @@ class Process
         $lname = Utilities::fetchRequiredDataFromArray($_POST, 'lname');
         $email = strtolower(trim(Utilities::fetchRequiredDataFromArray($_POST, 'email')));
         $mobile = substr(preg_replace( '/[^0-9]/', '', Utilities::fetchRequiredDataFromArray($_POST, 'mobile')), -10, 10);
-        $employees = (new Database())->processQuery("SELECT * FROM employee WHERE (emp_mobile_number = ? OR emp_email = ?) AND emp_id != ?", [$mobile, $email]);
+        $employees = (new Database())->processQuery("SELECT * FROM employee WHERE (emp_mobile_number = ? OR emp_email = ?) AND emp_id = ? AND emp_status = 0", [$mobile, $email, $empId]);
 
-        if (count($employees) > 0) {
-            return Utilities::response(false, ["error" => "E-mail/Mobile Number already in use. Unable to complete process."], null);
+        if (empty($employees)) {
+            return Utilities::response(false, ["error" => "E-mail/Mobile Number already in use or Employee is already Active. Unable to complete process."], null);
         }
 
-        $output = (new Database())->processQuery("UPDATE employee SET emp_first_name = ?, emp_last_name = ?, emp_mobile_number = ?, emp_email = ?, emp_updated_at = now() WHERE emp_id = ?", [$fname, $lname, $mobile, $email, $empId]);
+        $output = (new Database())->processQuery("UPDATE employee SET emp_first_name = ?, emp_last_name = ?, emp_mobile_number = ?, emp_email = ?, emp_updated_at = now() WHERE emp_id = ? and emp_status = 0", [$fname, $lname, $mobile, $email, $empId]);
 
         return Utilities::response(((!empty($output['response']) && $output['response'] == Defaults::SUCCESS) ? true : false), null, null);
     }
