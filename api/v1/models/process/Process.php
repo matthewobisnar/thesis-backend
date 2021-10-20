@@ -1,6 +1,7 @@
 <?php
 namespace api\v1\models\process;
 
+use api\v1\models\globe\GlobeLabs;
 use core\misc\Database;
 use core\misc\Defaults;
 use core\misc\Utilities;
@@ -127,6 +128,12 @@ class Process
         return Utilities::response(((!empty($output['response']) && $output['response'] == Defaults::SUCCESS) ? true : false), null, null);
     }
 
+    public static function updateEmployeeStatus($mobileNumber, $status)
+    {
+        $output = (new Database())->processQuery("UPDATE employee SET emp_status = ?, emp_updated_at = now() WHERE emp_mobile_number = ?", [$status, $mobileNumber]);
+        return ((!empty($output['response']) && $output['response'] == Defaults::SUCCESS) ? true : false);
+    }
+
     public static function getEmployee()
     {
         $empId = Utilities::fetchRequiredDataFromArray($_POST, 'emp_id');
@@ -186,16 +193,36 @@ class Process
     public static function createMessage()
     {
         $message = Utilities::fetchRequiredDataFromArray($_POST, 'message_content');
-       
-        $output = (new Database())->processQuery("INSERT INTO `message` (message_content, message_created_at) VALUES (?,now())", [$message]);
+        $numbers = Utilities::fetchRequiredDataFromArrayAsArray($_POST, 'message_numbers');
 
-        return Utilities::response(((!empty($output['response']) && $output['response'] == Defaults::SUCCESS) ? true : false), null, null);
+        $output = [];
+
+        $params = "(".str_repeat('?,', count($numbers) - 1).'?)';       
+        $checkEmployee = (new Database())->processQuery("SELECT * FROM `employee` INNER JOIN  `opt_in` on `opt_in_mobile_number` = `emp_mobile_number` WHERE `emp_status` = 1 and `opt_in_mobile_number` in $params", $numbers);
+
+        if (!empty($checkEmployee)) {
+            $insertMessage = (new Database())->processQuery("INSERT INTO `message` (message_content, message_created_at) VALUES (?, now())", [$message]);
+
+            if ((!empty($insertMessage['response']) && $insertMessage['response'] == Defaults::SUCCESS)) {
+        
+                foreach ($checkEmployee as $employee) {
+                    
+                    $mn = $employee['opt_in_mobile_number'];
+                    $tkn = $employee['opt_in_token'];
+
+                    (new Database())->processQuery("INSERT INTO `sent_message` (sent_message_message, sent_message_mobile) VALUES (?, ?)", [$insertMessage['last_inserted_id'], $mn]);
+                    $output[] = GlobeLabs::sendSms($mn, $tkn, $message);
+                }
+            }
+        }
+
+        return Utilities::response(true, null,  $output);
+
     }
 
     public static function getSentMessages()
     {
-        $messages = (new Database())->processQuery("SELECT * FROM sent_message LEFT JOIN employee ON emp_mobile_number = sent_message_mobile ORDER BY sent_created_at ASC", []);
-
+        $messages = (new Database())->processQuery("SELECT * FROM sent_message LEFT JOIN employee ON emp_mobile_number = sent_message_mobile LEFT JOIN `message` ON message_id = sent_message_message ORDER BY sent_created_at ASC", []);
         return Utilities::response(true, null, $messages);
     }
 
@@ -210,7 +237,7 @@ class Process
     public static function getSentMessagesDetail()
     {
         $sentMessageId = Utilities::fetchRequiredDataFromArray($_GET, 'sent_message_id');
-        $messages = (new Database())->processQuery("SELECT * FROM sent_message LEFT JOIN employee ON emp_mobile_number = sent_message_mobile WHERE sent_message_id = ? ", [$sentMessageId]);
+        $messages = (new Database())->processQuery("SELECT * FROM sent_message LEFT JOIN employee ON emp_mobile_number = sent_message_mobile LEFT JOIN `message` ON message_id = sent_message_message WHERE sent_message_id = ? ", [$sentMessageId]);
         return Utilities::response(true, null, $messages);
     }
 

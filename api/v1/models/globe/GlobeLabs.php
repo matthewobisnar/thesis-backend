@@ -4,10 +4,11 @@ namespace api\v1\models\globe;
 use core\misc\Utilities;
 use core\misc\Defaults;
 use core\misc\Database;
+use api\v1\models\process\Process;
 
 class GlobeLabs {
 
-    private const SMS_SHORT_CODE = "225659712"; // 21589712 (Cross-telco: 225659712)
+    private const SMS_SHORT_CODE = "225650607"; // 21589712 (Cross-telco: 225659712)
     private const SMS_URL = "https://devapi.globelabs.com.ph/smsmessaging/v1/outbound/{senderAddress}/requests?access_token={access_token}"; // Check GlobeLabs documentation for more details
 
     public static function redirectUrl()
@@ -28,12 +29,24 @@ class GlobeLabs {
         * Must store the details somewhere for you to be able to send SMS
         */
         $subscriberNumber = trim(Utilities::fetchRequiredDataFromArray($_GET, 'subscriber_number'));
-        $accessToken = trim(Utilities::fetchRequiredDataFromArray($_GET, 'access_token'));
-        $optIn = (new Database())->processQuery("INSERT INTO opt_in (opt_in_mobile_number, opt_in_token, opt_in_created_at) values (?,?,?)", [
-            $subscriberNumber,
-            $accessToken,
-            Utilities::getCurrentDate()
-        ]);
+        $accessToken = trim(Utilities::fetchRequiredDataFromArray($_GET, 'access_token'));    
+
+        $checkNumber = (new Database())->processQuery("SELECT opt_in_mobile_number FROM opt_in WHERE opt_in_mobile_number =?", [$subscriberNumber]);
+
+        if (!empty($checkNumber)) {
+            $optIn = (new Database())->processQuery("UPDATE opt_in set opt_in_token = ?, opt_in_updated_at = now() where opt_in_mobile_number = ?", [
+                $accessToken,
+                $subscriberNumber
+            ]);
+        } else {
+            $optIn = (new Database())->processQuery("INSERT INTO opt_in (opt_in_mobile_number, opt_in_token, opt_in_created_at) values (?,?,?)", [
+                $subscriberNumber,
+                $accessToken,
+                Utilities::getCurrentDate()
+            ]);
+        }
+
+        Process::updateEmployeeStatus($subscriberNumber, 1);
 
         if (!empty($optIn['response']) && $optIn['response'] == Defaults::SUCCESS) {
             return Utilities::response(true, null, null);
@@ -58,6 +71,8 @@ class GlobeLabs {
             $subscriberNumber,
             $accessToken
         ]);
+
+        Process::updateEmployeeStatus($subscriberNumber, 0);
 
         if (!empty($optOut['response']) && $optOut['response'] == Defaults::SUCCESS) {
             return Utilities::response(true, null, null);
@@ -86,9 +101,9 @@ class GlobeLabs {
 
         try {
             $result  = curl_exec ($ch);
-            Utilities::dd($result);
+           return $result;
         } catch (\Exception $e) {
-            Utilities::dd($e->getMessage());
+            return $e->getMessage();
         }
     }
 
